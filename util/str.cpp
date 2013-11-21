@@ -1,4 +1,6 @@
 #include "str.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 string file_base(string s) // "base.ext" -> "base"
 { 

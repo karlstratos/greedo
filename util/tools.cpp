@@ -2,6 +2,7 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 const double TINY = 1e-3;
 
 void report_fail(string remark)

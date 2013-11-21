@@ -1,0 +1,19 @@
+# ignore compiled files
+*.o 
+greedo
+
+# ignore debugging files
+*.debug
+
+# ignore embeddings
+embeddings/*
+!embeddings/README
+!embeddings/terry1k.dat
+
+# ignore outputs
+output/*
+!output/README
+
+# ignore writeup latex
+writeup/*
+!writeup/*.pdf

@@ -12,10 +12,10 @@ int main (int argc, char* argv[])
     P.start_logging();
 
     P.cluster();
-    
-    P.write_bitstrings();
-    
+
     P.end_logging();
+
+    P.write_bitstrings();
 
     if (P.debug) P.compare_matlab();
 

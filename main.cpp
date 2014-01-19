@@ -7,9 +7,9 @@ int main (int argc, char* argv[])
 
     P.get_args(argc, argv);
 
-    P.start_logging();
-
     P.read_data();
+    
+    P.start_logging();
 
     P.cluster();
     

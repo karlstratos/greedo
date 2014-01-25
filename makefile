@@ -7,4 +7,4 @@ main: $(files)
 	g++ -I util/eigen-eigen-ffa86ffb5570 -Wall -g -O3 -o $@ -c $<
 
 clean:
-	rm -rf util/*.o *.o greedo *.debug
+	rm -rf util/*.o *.o greedo *.debug output/small1k*

@@ -20,7 +20,8 @@ class program
 public:
     string data_file;
     size_t n;    
-    size_t m; 
+    size_t m;
+    size_t d;     
     bool quiet;
     bool verbose;
     bool debug;
@@ -33,7 +34,7 @@ public:
     program() { quiet = false; verbose = false; debug = false; }
 
     void get_args(int argc, char* argv[]);
-    void mkdir(string root);
+    void mkdir();
     void rec(string remark, bool newline = true);
     void start_logging(); 
     void end_logging();

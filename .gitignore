@@ -8,12 +8,11 @@ greedo
 # ignore embeddings
 embeddings/*
 !embeddings/README
-!embeddings/terry1k.dat
+!embeddings/small1k.dat
 
 # ignore outputs
 output/*
 !output/README
 
-# ignore writeup latex
+# ignore writeup
 writeup/*
-!writeup/*.pdf

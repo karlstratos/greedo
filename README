@@ -1,0 +1,17 @@
+                                                 Karl Stratos
+Hierarchical clustering of word vectors
+                                      stratos@cs.columbia.edu
+_____________________________________________________________
+- Type "make" to compile the source code. Then try: 
+
+./greedo --data_file embeddings/small1k.dat --m 1000
+_____________________________________________________________
+If you have matlab, you can compare the output with matlab:
+
+./greedo --data_file embeddings/small1k.dat --m 1000 --debug
+
+(For this, the number of points (n) must equal the number of clusters (m).)
+_____________________________________________________________
+If you want to store the results in a different directory, use the option --out:
+
+./greedo --data_file embeddings/small1k.dat --m 1000 --out /tmp/somedir

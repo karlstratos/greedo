@@ -10,6 +10,8 @@ void program::get_args(int argc, char* argv[])
 	    data_file = argv[++i];
 	else if(argv[i] == (string) "--m") 
 	    m = atoi(argv[++i]);
+	else if(argv[i] == (string) "--out")
+	    output_dir = argv[++i];
 	else if(argv[i] == (string) "--quiet")
 	    quiet = true;
 	else if(argv[i] == (string) "--verbose")
@@ -23,20 +25,24 @@ void program::get_args(int argc, char* argv[])
     if (argc == 1)
     {
 	cout << "Arguments:" << endl;
-	cout << setw(TAB) << left << "--data_file {data}"  << right << "path to data points" << endl;
-	cout << setw(TAB) << left << "--m {#}"  << right << "max number of active clusters" << endl;
-	cout << setw(TAB) << left << "--quiet"  << right << "no standard output" << endl;
-	cout << setw(TAB) << left << "--debug"  << right << "compare the result with matlab's" << endl;	
+	cout << setw(TAB) << left << "--data_file {data}" << right << "path to data points" << endl;
+	cout << setw(TAB) << left << "--m {#}" << right << "max number of active clusters" << endl;
+	cout << setw(TAB) << left << "--out {dirpath}" << right << "store results in this directory" << endl;
+	cout << setw(TAB) << left << "--quiet" << right << "no standard output" << endl;
+	cout << setw(TAB) << left << "--verbose" << right << "track the algorithm (for debugging)" << endl;
+	cout << setw(TAB) << left << "--debug" << right << "compare the result with matlab's" << endl;	
 	exit(0);
     }
 }
 
 
-void program::mkdir(string root)
+void program::mkdir()
 {
-    output_dir = root + file_base(strip_dir(data_file));
-    output_dir += ".m" + i_str(m);
-    output_dir += ".out";
+    if (output_dir == "") {
+	output_dir = "output/" + file_base(strip_dir(data_file));
+	output_dir += ".m" + i_str(m);
+	output_dir += ".out";
+    }
     if (system(("mkdir -p " + output_dir).c_str()) != 0)
 	report_fail("Can't create " + output_dir);
     if (system(("rm -f " + output_dir + "/*").c_str()) != 0)
@@ -54,24 +60,30 @@ void program::rec(string remark, bool newline)
 	cout << remark;
 	if (newline) cout << endl;
     }
+
+    logf.flush();
+    cout.flush();
 }
 
 
+time_t begin_time;
+
 void program::start_logging()
 {    
-    mkdir("output/");
+    mkdir();
     logf.open((output_dir + "/log").c_str());
 
-    time_t begin_time = time(NULL);
+    begin_time = time(NULL);
     rec(str_printf("Begin time: %s", ctime(&begin_time)));
 
     rec("-------------------------------------------------");
-    rec("Given arguments:");
-    rec("--data_file:\t" + data_file);
-    rec("--m:        \t" + i_str(m));
-    rec("--quiet:    \t" + i_str(quiet));
-    rec("--verbose:  \t" + i_str(verbose));    
-    rec("--debug:    \t" + i_str(debug));
+    rec("--data_file: \t" + data_file);
+    rec("--n:         \t" + i_str(n));
+    rec("--d:         \t" + i_str(d));
+    rec("--m:         \t" + i_str(m));
+    rec("--quiet:     \t" + i_str(quiet));
+    rec("--verbose:   \t" + i_str(verbose));    
+    rec("--debug:     \t" + i_str(debug));
     rec("-------------------------------------------------\n");
 }
 
@@ -80,7 +92,7 @@ void program::end_logging()
 {
     time_t end_time = time(NULL);
     rec(str_printf("End time: %s", ctime(&end_time)));
-    
+    rec(str_printf("Time taken: %.f seconds", difftime(end_time, begin_time)));
     logf.close();
 }
 
@@ -94,9 +106,7 @@ void program::read_data()
     x = D.x;
     freq = D.freq;
     n = v.size();
-    rec("\tnumber of points: " + i_str(n));
-    rec("\tnumber of dimensions: " + i_str(D.d) + "\n");
-
+    d = D.d;
     assert(m <= n);
     if (debug) assert(m == n);
 }
@@ -165,7 +175,7 @@ void program::cluster()
     size_t num_tightening = 0;
     for (size_t i = n; i < 2 * n - 1; i++) 
     {
-	if (((size_t) i-n+1) % STATUS_UNIT == 0) { rec(i_str(status) + " / " + i_str(n-1));  status += STATUS_UNIT; }
+	if (((size_t) i-n+1) % STATUS_UNIT == 0) { rec(str_printf("\r# of merges done: %d / %d", status, n-1), false);  status += STATUS_UNIT; }
 	
 	size_t t = i - n + m; // t ranges [m ... n-1] and also (don't care) [n ... n+m-2]
 
@@ -261,7 +271,7 @@ void program::cluster()
 	    assert(j != twin[j]); // useful sanity check
 	}
     }
-    rec("---average number of tightnings per merge: " + f_str(((float) num_tightening) / ((float) n - 1)) + " (as opposed to m = " + i_str(m) + ")\n");
+    rec("\n---average number of tightnings per merge: " + f_str(((float) num_tightening) / ((float) n - 1)) + " (as opposed to m = " + i_str(m) + ")\n");
 }
 
 
@@ -330,10 +340,9 @@ void program::write_bitstrings()
 	if (Z[i][0] > Z[i][1])
 	{
 	    double temp = Z[i][0]; Z[i][0] = Z[i][1]; Z[i][1] = temp;
-	    rec(i_str(Z[i][0]) + " " + i_str(Z[i][1]) + " " + f_str(sqrt(Z[i][2])));
 	}
     
-    rec("Encoding clusters as bit strings\n");
+    rec("Encoding clusters as bit strings to " + output_dir);
     map<string, vector<size_t> > subtree;       // subtree[001011] = { words under subtree 001011 }
     traverse("", 2*n-2, subtree);               // root cluster: 2n-2
     

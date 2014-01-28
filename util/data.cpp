@@ -37,6 +37,7 @@ void data::build(string datapath)
 	assert(this_freq <= old_freq);
 	freq.push_back(this_freq);
 	old_freq = this_freq;
+	std::cout << this_freq << " " << old_freq << std::endl;
 	    
 	x.push_back(toks[1]);
 	for (size_t i = 0; i < d; i++) 

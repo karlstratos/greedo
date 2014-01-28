@@ -32,6 +32,7 @@ void data::build(string datapath)
 	}
 
 	this_freq = atoi(toks[0].c_str());
+	std::cout << toks[0] << "\t" << toks[1] << "\t" << old_freq << std::endl;
 	if(this_freq > old_freq) std::cout << "assert violation at: " << toks[0] << " " << toks[1] << " (previous count: " << old_freq << ")" << std::endl;
 	assert(this_freq <= old_freq);
 	freq.push_back(this_freq);

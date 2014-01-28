@@ -32,12 +32,10 @@ void data::build(string datapath)
 	}
 
 	this_freq = strtoll(toks[0].c_str(), NULL, 10);
-	//std::cout << toks[0] << "\t" << toks[1] << "\t" << this_freq << "\t" << old_freq << std::endl;
 	if(this_freq > old_freq) std::cout << "assert violation at: " << toks[0] << " " << toks[1] << " (previous count: " << old_freq << ")" << std::endl;
 	assert(this_freq <= old_freq);
 	freq.push_back(this_freq);
 	old_freq = this_freq;
-	std::cout << this_freq << " " << old_freq << std::endl;
 	    
 	x.push_back(toks[1]);
 	for (size_t i = 0; i < d; i++) 

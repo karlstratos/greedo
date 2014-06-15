@@ -16,3 +16,7 @@ output/*
 
 # ignore writeup
 writeup/*
+
+# ignore dot files except for this
+.*
+!.gitignore

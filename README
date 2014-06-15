@@ -1,5 +1,7 @@
 Author: Karl Stratos (stratos@cs.columbia.edu)
 
+Release version: 1.0
+
 This program implements hierarchical clustering of word vectors. It uses the 
 lazy tightening trick of Franti et al. (2000) and initializes m active clusters
 by making the m most frequent word types as singleton clusters. Then it 

@@ -1,6 +1,10 @@
+// Author: Karl Stratos (stratos@cs.columbia.edu)
+//
+// A .cpp file for the program class.
+
 #include "program.h"
 #include <float.h>
-const size_t STATUS_UNIT = 1000;
+
 
 void program::get_args(int argc, char* argv[])
 {
@@ -113,12 +117,12 @@ void program::read_data()
 
 
 // (static)  S contains sizes of clusters 0 ... 2n-2
-vector<double>            S;      //      S[i] = size of cluster i 
+vector<double>            S;     //      S[i] = size of cluster i 
 
 // (dynamic) these are "holders" of m+1 active clusters 
 vector<size_t>           I;      //      I[i] : cluster at position i
 vector<Eigen::VectorXd>  C;      //      C[i] : center of I[i]
-vector<double>           lb;      //     lb[i] : distance from I[i] to its twin
+vector<double>           lb;     //     lb[i] : distance from I[i] to its twin
 vector<size_t>        twin;      //   twin[i] : I[twin[i]] is thought to be the closest cluster to I[i]
 vector<bool>         tight;      //  tight[i] : if this is true, lb[i] is tight and I[twin[i]] is definitely the closest cluster to I[i]
 
@@ -368,6 +372,8 @@ void program::write_bitstrings()
 }
 
 
+// Recursively traverse the hierarchy to label every leaf node with a bit string
+// indicating the path from the root.
 void program::traverse (string bits, size_t node, map<string, vector<size_t> >& subtree)
 {
     // if node < n, it's a leaf node 

@@ -1,8 +1,13 @@
+// Author: Karl Stratos (stratos@cs.columbia.edu)
+//
+// A .cpp for the data class.
+
 #include "data.h"
 #include "str.h"
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
+
 
 void data::build(string datapath)
 {

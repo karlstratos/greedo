@@ -1,17 +1,84 @@
-                                                 Karl Stratos
-Hierarchical clustering of word vectors
-                                      stratos@cs.columbia.edu
-_____________________________________________________________
-- Type "make" to compile the source code. Then try: 
+Author: Karl Stratos (stratos@cs.columbia.edu)
+
+This program implements hierarchical clustering of word vectors. It uses the 
+lazy tightening trick of Franti et al. (2000) and initializes m active clusters
+by making the m most frequent word types as singleton clusters. Then it 
+greedily merges a pair c, c' of clusters that are "closest" to each other. 
+
+For details, see: 
+
+A spectral algorithm for learning class-based n-gram models of natrual language
+Karl Stratos, Do-kyum Kim, Michael Collins, and Daniel Hsu.
+In Proceedings of UAI (2014).
+
+v------------------------------------------------------------------------------v
+| Quick start                                                                  |
+^------------------------------------------------------------------------------^
+Type "make" to compile the source code. There is a sample input data of word 
+vectors at embeddings/small1k.dat. Try:
 
 ./greedo --data_file embeddings/small1k.dat --m 1000
-_____________________________________________________________
-If you have matlab, you can compare the output with matlab:
+
+This should create a new directory called small1k.m1000.out/ in the output/ 
+directory. This new directory contains the following files.
+- log: logged information of the program's run.
+- paths: bit string encoding of the word types.
+
+v------------------------------------------------------------------------------v
+| Input file formatting                                                        |
+^------------------------------------------------------------------------------^
+The input file must follow the following two requirements. First, Each line must
+have the following form:
+     frequency    word    value_1    value_2    ...    value_d
+where frequency is the count of the word type (in whatever corpus the vector is
+derived), word is the word type string, and value_1, value_2, ... value_d are 
+the values of the entries of the vector for some d. Spacing of these attributes
+within the line doesn't matter.
+
+Second, the lines must be ordered in decreasing frequency. If your file contains
+n word types and the lines look like:
+     frequency_1 ...
+     frequency_2 ...
+     .
+     .
+     .
+     frequency_n ...
+then you must have frequency_1 >= frequency_2 >= ... >= frequency_n.
+
+See the sample file embeddings/small1k.dat for an example.
+ 
+v------------------------------------------------------------------------------v
+| Outputting to a different directory                                          |
+^------------------------------------------------------------------------------^
+If you want to store the results in your own directory rather than the default 
+one in output/, use the option --out. E.g.,
+
+./greedo --data_file embeddings/small1k.dat --m 1000 --out /tmp/somedir
+
+v------------------------------------------------------------------------------v
+| Debugging                                                                    |
+^------------------------------------------------------------------------------^
+For the case m = n, this program is tested by comparing with a Matlab function.
+Matlab does not use the technique of Franti et al. (2000), so it cannot be used
+for the case m < n.
+
+If you have Matlab, you can compare the output with Matlab's. Make sure you 
+correctly specify the matlab command in program.cpp in the function 
+compare_matlab(), and make sure you set the number of clusters (m) to be equal 
+to the number of points (n). Then you can call something like:
 
 ./greedo --data_file embeddings/small1k.dat --m 1000 --debug
 
-(For this, the number of points (n) must equal the number of clusters (m).)
-_____________________________________________________________
-If you want to store the results in a different directory, use the option --out:
+v------------------------------------------------------------------------------v
+| Command line options                                                         |
+^------------------------------------------------------------------------------^
+You can always ask for command line options by calling greedo without arguments:
 
-./greedo --data_file embeddings/small1k.dat --m 1000 --out /tmp/somedir
+$ ./greedo 
+Arguments:
+--data_file {data}                      path to data points
+--m {#}                                 max number of active clusters
+--out {dirpath}                         store results in this directory
+--quiet                                 no standard output
+--verbose                               track the algorithm (for debugging)
+--debug                                 compare the result with matlab's

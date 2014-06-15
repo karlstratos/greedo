@@ -1,26 +1,28 @@
-#include "str.h"
-#include <stdarg.h>
-#include <stdio.h>
+// Author: Karl Stratos (stratos@cs.columbia.edu)
+//
+// A .cpp file for useful string methods.
 
-string file_base(string s) // "base.ext" -> "base"
-{ 
+#include "str.h"
+
+
+string file_base(string s) {
     int i = s.rfind('.');
     return i == -1 ? s : substr(s, 0, i);
 }
 
-string strip_dir(string s) // "dir/file" -> "file"
-{
+
+string strip_dir(string s) {
     return substr(s, s.rfind('/')+1);    
 }
 
-string get_dir(string s)   // "dir/file" -> "dir"
-{
+
+string get_dir(string s) {
     int i = s.rfind('/');
     return i == -1 ? "." : substr(s, 0, s.rfind('/'));
 }
 
-void split(vector<string> & tokens, string line, string delimiter)
-{
+
+void split(vector<string> & tokens, string line, string delimiter) {
     size_t start = 0, end = 0;
     string token;
     while (end != string::npos)
@@ -41,8 +43,8 @@ void split(vector<string> & tokens, string line, string delimiter)
     }
 }
 
-string str_printf(const char *fmt, ...)
-{
+
+string str_printf(const char *fmt, ...) {
   char buf[16384];
   va_list ap;
   va_start(ap, fmt);
@@ -51,18 +53,18 @@ string str_printf(const char *fmt, ...)
   return buf;
 }
 
-string i_str(int x)
-{
+
+string i_str(int x) {
     return str_printf("%d", x);  
 }
 
-string f_str(double x)
-{
+
+string f_str(double x) {
     return str_printf("%f", x);
 }
 
-string substr(const string &s, int i, int j) // "s" -> "s(i:j-1)"
-{
+
+string substr(const string &s, int i, int j) {
     if(i < 0) i += s.length();
     if(j < 0) j += s.length();
     i = max(i, 0);
@@ -70,7 +72,7 @@ string substr(const string &s, int i, int j) // "s" -> "s(i:j-1)"
     return s.substr(i, j-i);
 }
 
-string substr(const string &s, int i)       // "s" -> "s(i:)"
-{
+
+string substr(const string &s, int i) {
     return substr(s, i, s.length());
 }

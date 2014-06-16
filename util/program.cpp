@@ -127,15 +127,15 @@ vector<size_t>        twin;      //   twin[i] : I[twin[i]] is thought to be the 
 vector<bool>         tight;      //  tight[i] : if this is true, lb[i] is tight and I[twin[i]] is definitely the closest cluster to I[i]
 
 
-// take extreme care to ensure C[i] and S[I[i]] match for the following inline functions to be correct
-inline double compute_dist(size_t i, size_t j) 
+// take extreme care to ensure C[i] and S[I[i]] match for the following functions to be correct
+double compute_dist(size_t i, size_t j) 
 {
     Eigen::VectorXd diff = C[i] - C[j];
     double scale = 2 * S[I[i]] * S[I[j]] / (S[I[i]] + S[I[j]]);
     return scale * diff.squaredNorm(); 
 }
 
-inline Eigen::VectorXd merge(size_t i, size_t j) 
+Eigen::VectorXd merge(size_t i, size_t j) 
 {
     double i_scale = S[I[i]] / (S[I[i]] + S[I[j]]);
     double j_scale = S[I[j]] / (S[I[i]] + S[I[j]]);

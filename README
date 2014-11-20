@@ -1,13 +1,13 @@
 Author: Karl Stratos (stratos@cs.columbia.edu)
 
-Release version: 1.0
+Release version: 1.1
 
-This program implements hierarchical clustering of word vectors. It uses the 
+This program implements hierarchical clustering of word vectors. It uses the
 lazy tightening trick of Franti et al. (2000) and initializes m active clusters
-by making the m most frequent word types as singleton clusters. Then it 
-greedily merges a pair c, c' of clusters that are "closest" to each other. 
+by making the m most frequent word types as singleton clusters. Then it
+greedily merges a pair c, c' of clusters that are "closest" to each other.
 
-For details, see: 
+For details, see:
 
 A spectral algorithm for learning class-based n-gram models of natrual language
 Karl Stratos, Do-kyum Kim, Michael Collins, and Daniel Hsu.
@@ -16,12 +16,12 @@ In Proceedings of UAI (2014).
 v------------------------------------------------------------------------------v
 | Quick start                                                                  |
 ^------------------------------------------------------------------------------^
-Type "make" to compile the source code. There is a sample input data of word 
+Type "make" to compile the source code. There is a sample input data of word
 vectors at embeddings/small1k.dat. Try:
 
 ./greedo --data_file embeddings/small1k.dat --m 1000
 
-This should create a new directory called small1k.m1000.out/ in the output/ 
+This should create a new directory called small1k.m1000.out/ in the output/
 directory. This new directory contains the following files.
 - log: logged information of the program's run.
 - paths: bit string encoding of the word types.
@@ -33,7 +33,7 @@ The input file must follow the following two requirements. First, Each line must
 have the following form:
      frequency    word    value_1    value_2    ...    value_d
 where frequency is the count of the word type (in whatever corpus the vector is
-derived), word is the word type string, and value_1, value_2, ... value_d are 
+derived), word is the word type string, and value_1, value_2, ... value_d are
 the values of the entries of the vector for some d. Spacing of these attributes
 within the line doesn't matter.
 
@@ -48,11 +48,11 @@ n word types and the lines look like:
 then you must have frequency_1 >= frequency_2 >= ... >= frequency_n.
 
 See the sample file embeddings/small1k.dat for an example.
- 
+
 v------------------------------------------------------------------------------v
 | Outputting to a different directory                                          |
 ^------------------------------------------------------------------------------^
-If you want to store the results in your own directory rather than the default 
+If you want to store the results in your own directory rather than the default
 one in output/, use the option --out. E.g.,
 
 ./greedo --data_file embeddings/small1k.dat --m 1000 --out /tmp/somedir
@@ -64,9 +64,9 @@ For the case m = n, this program is tested by comparing with a Matlab function.
 Matlab does not use the technique of Franti et al. (2000), so it cannot be used
 for the case m < n.
 
-If you have Matlab, you can compare the output with Matlab's. Make sure you 
-correctly specify the matlab command in program.cpp in the function 
-compare_matlab(), and make sure you set the number of clusters (m) to be equal 
+If you have Matlab, you can compare the output with Matlab's. Make sure you
+correctly specify the matlab command in program.cpp in the function
+compare_matlab(), and make sure you set the number of clusters (m) to be equal
 to the number of points (n). Then you can call something like:
 
 ./greedo --data_file embeddings/small1k.dat --m 1000 --debug
@@ -76,7 +76,7 @@ v------------------------------------------------------------------------------v
 ^------------------------------------------------------------------------------^
 You can always ask for command line options by calling greedo without arguments:
 
-$ ./greedo 
+$ ./greedo
 Arguments:
 --data_file {data}                      path to data points
 --m {#}                                 max number of active clusters
@@ -84,3 +84,11 @@ Arguments:
 --quiet                                 no standard output
 --verbose                               track the algorithm (for debugging)
 --debug                                 compare the result with matlab's
+
+v------------------------------------------------------------------------------v
+| Version history                                                              |
+^------------------------------------------------------------------------------^
+1.0 -> 1.1:
+(Change thanks to Nikos Karampatziakis)
+Switched the recursion in the tree traversal function to std::stack in order to
+prevent stack buffer overflow.

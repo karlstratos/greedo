@@ -25,23 +25,23 @@ const size_t STATUS_UNIT = 1000;  // report status every this many merges
 
 
 class program {
-    string output_dir;  // path to output directory  
+    string output_dir;  // path to output directory
     ofstream logf;  // output_dir/"log"
-    
+
 public:
     string data_file;  // path to input data of word vectors
     vector< Eigen::VectorXd > v;  // holder of vectors
     vector<string> x;  // holder of word types
     vector<size_t> freq;  // holder of frequencies
-    
-    size_t n;  // number of distinct word types 
+
+    size_t n;  // number of distinct word types
     size_t m;  // number of active clusters
     size_t d;  // dimension of vectors
-    vector< vector<double> > Z;  // output: record n-1 merges    
+    vector< vector<double> > Z;  // output: record n-1 merges
     bool quiet;
     bool verbose;
     bool debug;
-    
+
     program() { quiet = false; verbose = false; debug = false; }
 
     // Collects command line arguments.
@@ -50,7 +50,7 @@ public:
     // Makes output directory.
     void mkdir();
 
-    // Records the given remark to log and also cout if not quiet. 
+    // Records the given remark to log and also cout if not quiet.
     void rec(string remark, bool newline = true);
 
     // Called at the start of logging.
@@ -69,8 +69,7 @@ public:
     void write_bitstrings();
 
     // Transforms the hierarchy into a bit string format.
-    void traverse (string bits, size_t node,
-		   map<string, vector<size_t> >& subtree);
+    void traverse(map<string, vector<size_t> >& subtree);
 
     // Compares the output with Matlab.
     void compare_matlab();

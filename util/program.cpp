@@ -4,6 +4,8 @@
 
 #include "program.h"
 #include <float.h>
+#include <stack>
+using std::stack;
 
 
 void program::get_args(int argc, char* argv[])
@@ -12,14 +14,14 @@ void program::get_args(int argc, char* argv[])
     {
 	if(argv[i] == (string) "--data_file")
 	    data_file = argv[++i];
-	else if(argv[i] == (string) "--m") 
+	else if(argv[i] == (string) "--m")
 	    m = atoi(argv[++i]);
 	else if(argv[i] == (string) "--out")
 	    output_dir = argv[++i];
 	else if(argv[i] == (string) "--quiet")
 	    quiet = true;
 	else if(argv[i] == (string) "--verbose")
-	    verbose = true;	
+	    verbose = true;
 	else if(argv[i] == (string) "--debug")
 	    debug = true;
 	else
@@ -34,7 +36,7 @@ void program::get_args(int argc, char* argv[])
 	cout << setw(TAB) << left << "--out {dirpath}" << right << "store results in this directory" << endl;
 	cout << setw(TAB) << left << "--quiet" << right << "no standard output" << endl;
 	cout << setw(TAB) << left << "--verbose" << right << "track the algorithm (for debugging)" << endl;
-	cout << setw(TAB) << left << "--debug" << right << "compare the result with matlab's" << endl;	
+	cout << setw(TAB) << left << "--debug" << right << "compare the result with matlab's" << endl;
 	exit(0);
     }
 }
@@ -50,7 +52,7 @@ void program::mkdir()
     if (system(("mkdir -p " + output_dir).c_str()) != 0)
 	report_fail("Can't create " + output_dir);
     if (system(("rm -f " + output_dir + "/*").c_str()) != 0)
-	report_fail("Can't remove things in " + output_dir);    
+	report_fail("Can't remove things in " + output_dir);
 }
 
 
@@ -60,7 +62,7 @@ void program::rec(string remark, bool newline)
     if (newline) logf << endl;
 
     if (!quiet)
-    { 
+    {
 	cout << remark;
 	if (newline) cout << endl;
     }
@@ -73,7 +75,7 @@ void program::rec(string remark, bool newline)
 time_t begin_time;
 
 void program::start_logging()
-{    
+{
     mkdir();
     logf.open((output_dir + "/log").c_str());
 
@@ -86,7 +88,7 @@ void program::start_logging()
     rec("--d:         \t" + i_str(d));
     rec("--m:         \t" + i_str(m));
     rec("--quiet:     \t" + i_str(quiet));
-    rec("--verbose:   \t" + i_str(verbose));    
+    rec("--verbose:   \t" + i_str(verbose));
     rec("--debug:     \t" + i_str(debug));
     rec("-------------------------------------------------\n");
 }
@@ -117,9 +119,9 @@ void program::read_data()
 
 
 // (static)  S contains sizes of clusters 0 ... 2n-2
-vector<double>            S;     //      S[i] = size of cluster i 
+vector<double>            S;     //      S[i] = size of cluster i
 
-// (dynamic) these are "holders" of m+1 active clusters 
+// (dynamic) these are "holders" of m+1 active clusters
 vector<size_t>           I;      //      I[i] : cluster at position i
 vector<Eigen::VectorXd>  C;      //      C[i] : center of I[i]
 vector<double>           lb;     //     lb[i] : distance from I[i] to its twin
@@ -128,14 +130,14 @@ vector<bool>         tight;      //  tight[i] : if this is true, lb[i] is tight 
 
 
 // take extreme care to ensure C[i] and S[I[i]] match for the following functions to be correct
-double compute_dist(size_t i, size_t j) 
+double compute_dist(size_t i, size_t j)
 {
     Eigen::VectorXd diff = C[i] - C[j];
     double scale = 2 * S[I[i]] * S[I[j]] / (S[I[i]] + S[I[j]]);
-    return scale * diff.squaredNorm(); 
+    return scale * diff.squaredNorm();
 }
 
-Eigen::VectorXd merge(size_t i, size_t j) 
+Eigen::VectorXd merge(size_t i, size_t j)
 {
     double i_scale = S[I[i]] / (S[I[i]] + S[I[j]]);
     double j_scale = S[I[j]] / (S[I[i]] + S[I[j]]);
@@ -145,13 +147,13 @@ Eigen::VectorXd merge(size_t i, size_t j)
 
 void program::cluster()
 {
-                                           // for i = 0...n-2    
+                                           // for i = 0...n-2
     Z.resize(n - 1);                       //         Z[i][0] = index of the left child of cluster n+i
     for (size_t i = 0; i < n - 1; i++)     //         Z[i][1] = index of the right child of cluster n+i
 	Z[i].resize(3);                    //         Z[i][2] = distance between the children of cluster n+i
 
-    S.resize(2 * n - 1);                   
-    I.resize(m+1);                         
+    S.resize(2 * n - 1);
+    I.resize(m+1);
     C.resize(m+1);
     lb.resize(m+1);
     twin.resize(m+1);
@@ -159,8 +161,8 @@ void program::cluster()
 
     // initialize the top m points as singleton clusters and compute pairwise distances: then tight[i] = true for i = 0 ... m-1
     for (size_t i = 0; i < m; i++)
-    { 
-	S[i] = 1; 
+    {
+	S[i] = 1;
 	I[i] = i;
 	C[i] = v[i];
 	lb[i] = DBL_MAX;
@@ -177,10 +179,10 @@ void program::cluster()
     // main loop: construct n - 1 hierarchical clusters i = n ... 2n-2
     size_t status = 0;
     size_t num_tightening = 0;
-    for (size_t i = n; i < 2 * n - 1; i++) 
+    for (size_t i = n; i < 2 * n - 1; i++)
     {
 	if (((size_t) i-n+1) % STATUS_UNIT == 0) { rec(str_printf("\r# of merges done: %d / %d", status, n-1), false);  status += STATUS_UNIT; }
-	
+
 	size_t t = i - n + m; // t ranges [m ... n-1] and also (don't care) [n ... n+m-2]
 
 	// if t < n, set singleton cluster t as our (m+1)-th active cluster in our holders and compute distances to the other m active clusters
@@ -197,17 +199,17 @@ void program::cluster()
 		if (dist < lb[j]) { lb[j] = dist; twin[j] = m; tight[j] = true; } // lb[j] tight if this happens even if it wasn't before
 	    }
 	}
-	
+
 	size_t r = min(m + 1, 2 * n - i); // r ranges [m+1 ... 2]: only consider the first r elements in "holders"
 
 	if (verbose) { cout << "I: "; for (size_t j = 0; j < r; j++) cout << I[j] << " "; cout << endl; }
 
-	// find the cluster I[a] that has the (possibly underestimated) smallest twin distance 
-	size_t a = 0;                         
-	double min_dist = DBL_MAX;         
+	// find the cluster I[a] that has the (possibly underestimated) smallest twin distance
+	size_t a = 0;
+	double min_dist = DBL_MAX;
 	for (size_t j = 0; j < r; j++) if (lb[j] < min_dist) { min_dist = lb[j]; a = j; }
 
-	while (!tight[a])                 
+	while (!tight[a])
 	{
 	    // I[a]'s twin distance was underestimated, so tighten it
 	    num_tightening++;
@@ -224,7 +226,7 @@ void program::cluster()
 	    min_dist = DBL_MAX;
 	    for (size_t j = 0; j < r; j++) if (lb[j] < min_dist) { min_dist = lb[j]; a = j; }
 	}
-	
+
 	size_t b = twin[a];
 	if (a > b) { size_t temp = a; a = b; b = temp; } // now we have a < b
 
@@ -232,7 +234,7 @@ void program::cluster()
 
 	// cluster whose twin was either I[a] or I[b] now has an underestimated twin distance since I[a] and I[b] are gone
 	for (size_t j = 0; j < r; j++)
-	    if (twin[j] == a || twin[j] == b) 
+	    if (twin[j] == a || twin[j] == b)
 	    {
 		tight[j] = false;
 		if (verbose) rec("------" + i_str(j) + " (" + i_str(I[j]) + ")'s twin distance is loosened");
@@ -240,14 +242,14 @@ void program::cluster()
 
 	// record the merge: cluster i is the merge of I[a] and I[b]
 	if (verbose) rec("Merging " + i_str(I[a]) + " (size " + i_str(S[I[a]]) + ") and " + i_str(I[b]) + " (size " + i_str(S[I[b]]) + ")");
-	Z[i-n][0] = I[a];           
-	Z[i-n][1] = I[b];     
+	Z[i-n][0] = I[a];
+	Z[i-n][1] = I[b];
 	Z[i-n][2] = min_dist;
 	S[i] = S[I[a]] + S[I[b]];
-	
+
 	// put cluster i at position a in holders
 	C[a] = merge(a, b); // MUST call merge(a, b) before changing I[a]!
-	I[a] = i;                    
+	I[a] = i;
 	lb[a] = DBL_MAX;
 	for (size_t j = 0; j < r; j++)
 	{
@@ -265,8 +267,8 @@ void program::cluster()
 
 	    if (j >= b) // j ranges [b ... r-2] here: j points to cluster I[j+1]
 	    {
-		I[j] = I[j+1];   
-		C[j] = C[j+1];   
+		I[j] = I[j+1];
+		C[j] = C[j+1];
 		lb[j] = lb[j+1];
 		(twin[j+1] < b) ? twin[j] = twin[j+1] : twin[j] = twin[j+1]-1;
 		tight[j] = tight[j+1];
@@ -288,7 +290,7 @@ void program::compare_matlab()
     for (size_t i = 0; i < Z.size(); i++)
 	outf << Z[i][0]+1 << " " << Z[i][1]+1 << " " << sqrt(Z[i][2]) << endl;
     outf.close();
-    
+
     outf.open("Y.debug");
     for (size_t i = 0; i < v.size(); i++)
 	outf << v[i].transpose() << endl;
@@ -296,7 +298,7 @@ void program::compare_matlab()
     if (system(("/Applications/MATLAB_R2013b.app/bin/matlab -nodesktop -nosplash -nodisplay -r \"run('util/debug.m')\"")) != 0) // change path to matlab as needed
 	report_fail("Can't run matlab---check if your path to matlab in program.cpp is correct");
 
-    ifstream datafile;    
+    ifstream datafile;
     datafile.open("Z.matlab.debug");
     assert(datafile.is_open());
 
@@ -305,7 +307,7 @@ void program::compare_matlab()
     size_t i = 0;
     bool same = true;
     while(datafile.good()) {
-	getline(datafile, line);	    	    
+	getline(datafile, line);
 	if(line == "") continue;
 
 	toks.clear();
@@ -315,7 +317,7 @@ void program::compare_matlab()
 	size_t right = atoi(toks[1].c_str()) - 1;
 	double dist = atof(toks[2].c_str());
 
-	
+
 	if (Z[i][0] != left || Z[i][1] != right || !very_close(sqrt(Z[i][2]), dist))
 	{
 	    cout << "row " << i+1 << " not the same!" << endl;
@@ -331,7 +333,7 @@ void program::compare_matlab()
 }
 
 
-std::vector<size_t> lst; 
+std::vector<size_t> lst;
 bool lst_compare(size_t i, size_t j)
 {
   return lst[i] > lst[j];
@@ -345,11 +347,11 @@ void program::write_bitstrings()
 	{
 	    double temp = Z[i][0]; Z[i][0] = Z[i][1]; Z[i][1] = temp;
 	}
-    
+
     rec("Encoding clusters as bit strings to " + output_dir);
     map<string, vector<size_t> > subtree;       // subtree[001011] = { words under subtree 001011 }
-    traverse("", 2*n-2, subtree);               // root cluster: 2n-2
-    
+    traverse(subtree);
+
     ofstream outf;
     outf.open((output_dir + "/paths").c_str());
     for(map<string, vector<size_t> >::iterator itr = subtree.begin(); itr != subtree.end(); itr++)
@@ -362,39 +364,47 @@ void program::write_bitstrings()
 	    lst.push_back(freq[words[i]]);
 	    inds.push_back(i);
 	}
-	
-	sort(inds.begin(), inds.end(), lst_compare); // sort indices by the word frequncies 
+
+	sort(inds.begin(), inds.end(), lst_compare); // sort indices by the word frequncies
 
 	for (size_t i = 0; i < lst.size(); i++)
 	    outf << itr->first << "\t" << x[words[inds[i]]] << "\t" << freq[words[inds[i]]] << endl;
     }
-    outf.close();    
+    outf.close();
 }
 
 
-// Recursively traverse the hierarchy to label every leaf node with a bit string
-// indicating the path from the root.
-void program::traverse (string bits, size_t node, map<string, vector<size_t> >& subtree)
+// Traverse the hierarchy to label every leaf node with a bit string indicating the path from the root.
+void program::traverse(map<string, vector<size_t> >& subtree)
 {
-    // if node < n, it's a leaf node 
-    if (node < n) 
-	subtree[bits].push_back(node);
+    stack<std::pair<size_t,string> > recursion_stack;
+    // root cluster: 2n-2
+    recursion_stack.push(make_pair(2*n-2,""));
 
-    else
-    {
-	size_t node1 = Z[node-n][0];
-	size_t node2 = Z[node-n][1];
+    while(! recursion_stack.empty()){
+        std::pair<size_t,string> nodebits = recursion_stack.top();
+        recursion_stack.pop();
+        size_t node = nodebits.first;
+        string bits = nodebits.second;
+        // if node < n, it's a leaf node
+        if (node < n)
+	    subtree[bits].push_back(node);
+        else
+        {
+            size_t node1 = Z[node-n][0];
+            size_t node2 = Z[node-n][1];
 
-	string left_bits = bits;
-	string right_bits = bits;
-	
-	if (node >= 2*n - m)
-	{
-	    left_bits = left_bits + "0";
-	    right_bits = right_bits + "1";
-	}
+            string left_bits = bits;
+            string right_bits = bits;
 
-	traverse(left_bits,  node1, subtree);
-	traverse(right_bits, node2, subtree);
+            if (node >= 2*n - m)
+            {
+                left_bits = left_bits + "0";
+                right_bits = right_bits + "1";
+            }
+
+            recursion_stack.push(make_pair(node1,left_bits));
+            recursion_stack.push(make_pair(node2,right_bits));
+        }
     }
 }
